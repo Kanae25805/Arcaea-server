@@ -445,29 +445,48 @@ def item():
     })
 
 
-@app.route('/coffee/12/purchase/me/pack', methods=['POST'])  # 购买，自然没有用
+@app.route('/coffee/12/purchase/me/pack', methods=['POST'])  # 购买 自然没有用(x) 现在有用了(v)
 def pack():
-    return jsonify({
-        "success": True
-    })
+    headers = request.headers
+    token = headers['Authorization']
+    token = token[7:]
 
+    try:
+        if 'pack_id' in request.form:
+            user_id = server.auth.token_get_id(token)
+            if user_id is not None:
+                server.info.add_song_pack(user_id, request.form['pack_id'])
+                r = server.info.get_song_pack_info_by_id(request.form['pack_id'])
+                server.info.take_memories(user_id, r['price'])
+                return jsonify({
+                    "success": True
+                })
+            else:
+                return error_return(108)
+        elif 'single_id' in request.form:
+            user_id = server.auth.token_get_id(token)
+            if user_id is not None:
+                server.info.add_single(user_id, request.form['single_id'])
+                r = server.info.get_single_info_by_id(request.form['single_id'])
+                server.info.take_memories(user_id, r['price'])
+                return jsonify({
+                    "success": True
+                })
+            else:
+                return error_return(108)
+        else:
+            return error_return(108)
+    except:
+        return error_return(108)
 
-@app.route('/coffee/12/purchase/bundle/single', methods=['GET'])  # 单曲购买，自然没有用
+@app.route('/coffee/12/purchase/bundle/single', methods=['GET'])  # 单曲信息获取
 def single():
+    x = server.info.get_single_infos()
+
     return jsonify({
         "success": True,
-        "value": [{
-            "name": "testsingle",
-            "items": [{
-                    "id": "testsingle",
-                "type": "single",
-                        "is_available": False
-            }],
-            "price": 100,
-            "orig_price": 100
-        }]
+        "value": x
     })
-
 
 @app.route('/coffee/12/world/map/me', methods=['GET'])  # 获得世界模式信息，所有地图
 def world_all():

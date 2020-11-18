@@ -1,5 +1,6 @@
 import sqlite3
 import server.arcworld
+import json
 
 
 def int2b(x):
@@ -56,24 +57,46 @@ def get_user_character(c, user_id):
             y = c.fetchone()
             if y is not None:
                 char_name = y[0]
-            s.append({
-                "is_uncapped_override": int2b(i[14]),
-                "is_uncapped": int2b(i[13]),
-                "uncap_cores": [],
-                "char_type": i[12],
-                "skill_id_uncap": i[11],
-                "skill_requires_uncap": int2b(i[10]),
-                "skill_unlock_level": i[9],
-                "skill_id": i[8],
-                "overdrive": i[7],
-                "prog": i[6],
-                "frag": i[5],
-                "level_exp": i[4],
-                "exp": i[3],
-                "level": i[2],
-                "name": char_name,
-                "character_id": i[1]
-            })
+            
+            if char_name == "Yume":
+                s.append({
+                    "is_uncapped_override": int2b(i[14]),
+                    "is_uncapped": int2b(i[13]),
+                    "uncap_cores": [],
+                    "char_type": i[12],
+                    "skill_id_uncap": i[11],
+                    "skill_requires_uncap": int2b(i[10]),
+                    "skill_unlock_level": i[9],
+                    "skill_id": i[8],
+                    "overdrive": i[7],
+                    "prog": i[6],
+                    "frag": i[5],
+                    "level_exp": i[4],
+                    "exp": i[3],
+                    "level": i[2],
+                    "name": char_name,
+                    "character_id": i[1],
+                    "voice": [0, 1, 2, 3, 100, 1000, 1001]
+                })
+            else:
+                s.append({
+                    "is_uncapped_override": int2b(i[14]),
+                    "is_uncapped": int2b(i[13]),
+                    "uncap_cores": [],
+                    "char_type": i[12],
+                    "skill_id_uncap": i[11],
+                    "skill_requires_uncap": int2b(i[10]),
+                    "skill_unlock_level": i[9],
+                    "skill_id": i[8],
+                    "overdrive": i[7],
+                    "prog": i[6],
+                    "frag": i[5],
+                    "level_exp": i[4],
+                    "exp": i[3],
+                    "level": i[2],
+                    "name": char_name,
+                    "character_id": i[1]
+                })
 
         return s
     else:
@@ -139,7 +162,7 @@ def get_value_0(c, user_id):
              "name": x[1],
              "user_code": x[4],
              "display_name": x[1],
-             "ticket": 114514,
+             "ticket": x[26],
              "character": x[6],
              "is_locked_name_duplicate": False,
              "is_skill_sealed": int2b(x[7]),
@@ -150,8 +173,8 @@ def get_value_0(c, user_id):
              "stamina": 12,
              "world_unlocks": [],
              "world_songs": ["babaroque", "shadesoflight", "kanagawa", "lucifer", "anokumene", "ignotus", "rabbitintheblackroom", "qualia", "redandblue", "bookmaker", "darakunosono", "espebranch", "blacklotus", "givemeanightmare", "vividtheory", "onefr", "gekka", "vexaria3", "infinityheaven3", "fairytale3", "goodtek3", "suomi", "rugie", "faintlight", "harutopia", "goodtek", "dreaminattraction", "syro", "diode", "freefall", "grimheart", "blaster", "cyberneciacatharsis", "monochromeprincess", "revixy", "vector", "supernova", "nhelv", "purgatorium3", "dement3", "crossover", "guardina", "axiumcrisis", "worldvanquisher", "sheriruth", "pragmatism", "gloryroad", "etherstrike", "corpssansorganes", "lostdesire", "blrink", "essenceoftwilight", "lapis"],
-             "singles": ["dataerror", "yourvoiceso", "crosssoul", "impurebird", "auxesia", "modelista", "yozakurafubuki", "surrender", "metallicpunisher", "carminescythe", "bethere", "callmyname", "fallensquare", "dropdead", "alexandrite", "astraltale", "phantasia", "empireofwinter", "libertas", "dottodot", "dreadnought", "mirzam", "heavenlycaress", "filament", "avantraze", "battlenoone", "saikyostronger", "izana", "einherjar", "laqryma", "amygdata", "altale", "feelssoright", "scarletcage", "teriqma", "mahoroba", "badtek", "maliciousmischance", "buchigireberserker", "galaxyfriends", "buchigireberserker2", "xeraphinite"],
-             "packs": ["vs", "extend", "dynamix", "prelude", "core", "yugamu", "omatsuri", "zettai", "mirai", "shiawase", "chunithm", "nijuusei", "groovecoaster", "rei", "tonesphere", "lanota"],
+             "singles": get_user_singles(c, user_id), # ["dataerror", "yourvoiceso", "crosssoul", "impurebird", "auxesia", "modelista", "yozakurafubuki", "surrender", "metallicpunisher", "carminescythe", "bethere", "callmyname", "fallensquare", "dropdead", "alexandrite", "astraltale", "phantasia", "empireofwinter", "libertas", "dottodot", "dreadnought", "mirzam", "heavenlycaress", "filament", "avantraze", "battlenoone", "saikyostronger", "izana", "einherjar", "laqryma", "amygdata", "altale", "feelssoright", "scarletcage", "teriqma", "mahoroba", "badtek", "maliciousmischance", "buchigireberserker", "galaxyfriends", "buchigireberserker2", "xeraphinite"],
+             "packs": get_user_packs(c, user_id), # ["vs", "extend", "dynamix", "prelude", "core", "yugamu", "omatsuri", "zettai", "mirai", "shiawase", "chunithm", "nijuusei", "groovecoaster", "rei", "tonesphere" ,"lanota"],
              "characters": characters,
              "cores": [],
              "recent_score": get_recent_score(c, user_id),
@@ -160,6 +183,149 @@ def get_value_0(c, user_id):
              "join_date": int(x[3])
              }
 
+    return r
+
+def take_memories(user_id, price):
+    conn = sqlite3.connect('./database/arcaea_database.db')
+    c = conn.cursor()
+
+    c.execute('''SELECT memories FROM user WHERE user_id = :user_id''', {'user_id': user_id})
+    orig_mmrs = c.fetchone()[0]
+
+    c.execute('UPDATE user SET memories = {0} WHERE user_id = :user_id'.format(str(orig_mmrs - price)), {'user_id': user_id})
+    conn.commit()
+    conn.close()
+
+    return
+
+def get_user_singles(c, user_id):
+    # 返回用户的单曲持有信息 类型为列表
+    c.execute('''SELECT single_id FROM purchase_single WHERE user_id = :user_id''', {'user_id': user_id})
+    x = c.fetchall()
+    r = []
+
+    for p in x:
+        r.append(p[0])
+
+    return r    
+
+def get_user_packs(c, user_id):
+    # 返回用户的曲包持有信息 类型为列表
+    c.execute('''SELECT pack_id FROM purchase WHERE user_id = :user_id''', {'user_id': user_id})
+    x = c.fetchall()
+    r = []
+
+    for p in x:
+        r.append(p[0])
+
+    return r
+
+def add_single(user_id, single_id):
+    # 为用户添加单曲
+    conn = sqlite3.connect('./database/arcaea_database.db')
+    c = conn.cursor()
+
+    c.execute('''INSERT INTO purchase_single VALUES (:user_id, :single_id)''', {'user_id': user_id, 'single_id': single_id})
+    conn.commit()
+    conn.close()
+    
+    return
+
+def add_song_pack(user_id, pack_id):
+    # 为用户添加曲包
+    conn = sqlite3.connect('./database/arcaea_database.db')
+    c = conn.cursor()
+    
+    c.execute('''INSERT INTO purchase VALUES (:user_id, :pack_id)''', {'user_id': user_id, 'pack_id': pack_id})
+    conn.commit()
+    conn.close()
+
+    return
+
+def get_song_pack_info_by_id(pack_id):
+    with open('./database/songpacks.json') as f:
+        obj = json.loads(f.read())
+        f.close()
+    
+    r = {}
+    for pack in obj['packs']:
+        if pack['name'] == pack_id:
+            r = pack
+            break
+
+    return r
+
+def get_single_info_by_id(single_id):
+    with open('./database/singles.json') as f:
+        obj = json.loads(f.read())
+        f.close()
+    
+    r = {}
+    for single in obj['singles']:
+        if single['name'] == single_id:
+            r = single
+            break
+    
+    return r
+
+def get_song_pack_infos():
+    # 返回 songpacks.json 曲包信息 类型为列表
+    with open('./database/songpacks.json') as f:
+        obj = json.loads(f.read())
+        f.close()
+    
+    r = []
+    for pack in obj['packs']:
+        p = {
+            "name": pack['name'],
+            "items": [],
+            "price": pack['price'],
+            "orig_price": pack['orig_price'],
+        }
+
+        if 'discount_from' in pack and 'discount_to' in pack:
+            p['discount_from'] = pack['discount_from']
+            p['discount_to'] = pack['discount_to']
+
+        for item in pack['items']:
+            p['items'].append({
+                "id": item['id'],
+                "type": item['type'],
+                "is_available": item['is_available']
+            })
+        
+        r.append(p)
+    
+    return r
+
+def get_single_infos():
+    # 返回 singles.json 单曲信息 类型为列表
+    with open('./database/singles.json') as f:
+        obj = json.loads(f.read())
+        f.close()
+    
+    r = []
+    for single in obj['singles']:
+        s = {
+            "name": single['name'],
+            "items": [],
+            "price": single['price'],
+            "orig_price": single['orig_price']
+        }
+
+        if 'discount_from' in single and 'discount_to' in single:
+            s['discount_from'] = single['discount_from']
+            s['discount_to'] = single['discount_to']
+
+        for item in single['items']:
+            s['items'].append({
+                "id": item['id'],
+                "type": item['type'],
+                "is_available": item['is_available']
+            })
+        
+        r.append(s)
+    
     return r
 
 
@@ -190,185 +356,7 @@ def arc_aggregate_big(user_id):
              "value": get_value_0(c, user_id)
          }, {
              "id": 1,
-             "value": [{
-                 "name": "core",
-                 "items": [{
-                     "id": "core",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "shiawase",
-                 "items": [{
-                     "id": "shiawase",
-                     "type": "pack",
-                     "is_available": True
-                 }, {
-                     "id": "kou",
-                     "type": "character",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1552089600000,
-                 "discount_to": 1552694399000
-             }, {
-                 "name": "dynamix",
-                 "items": [{
-                     "id": "dynamix",
-                     "type": "pack",
-                     "is_available": True
-                 }, {
-                     "id": "sapphire",
-                     "type": "character",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "mirai",
-                 "items": [{
-                     "id": "mirai",
-                     "type": "pack",
-                     "is_available": True
-                 }, {
-                     "id": "lethe",
-                     "type": "character",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1552089600000,
-                 "discount_to": 1552694399000
-             }, {
-                 "name": "yugamu",
-                 "items": [{
-                     "id": "yugamu",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "lanota",
-                 "items": [{
-                     "id": "lanota",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "nijuusei",
-                 "items": [{
-                     "id": "nijuusei",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "rei",
-                 "items": [{
-                     "id": "rei",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "tonesphere",
-                 "items": [{
-                     "id": "tonesphere",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "groovecoaster",
-                 "items": [{
-                     "id": "groovecoaster",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "zettai",
-                 "items": [{
-                     "id": "zettai",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500,
-                 "discount_from": 1583712000000,
-                 "discount_to": 1584316799000
-             }, {
-                 "name": "chunithm",
-                 "items": [{
-                     "id": "chunithm",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 300,
-                 "orig_price": 300
-             }, {
-                 "name": "prelude",
-                 "items": [{
-                     "id": "prelude",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 400,
-                 "orig_price": 400
-             }, {
-                 "name": "omatsuri",
-                 "items": [{
-                     "id": "omatsuri",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500
-             }, {
-                 "name": "vs",
-                 "items": [{
-                     "id": "vs",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 500,
-                 "orig_price": 500
-             }, {
-                 "name": "extend",
-                 "items": [{
-                     "id": "extend",
-                     "type": "pack",
-                     "is_available": True
-                 }],
-                 "price": 700,
-                 "orig_price": 700
-             }]
+             "value": get_song_pack_infos()
          }, {
              "id": 2,
              "value": {}
