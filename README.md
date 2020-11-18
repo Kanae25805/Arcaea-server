@@ -48,10 +48,9 @@ Only keep the latest version.
 
 > Tips: When updating, please keep the original database in case of data loss.
 
-### Version 1.5
+### Version 1.7
 - Still for Arcaea 3.2.2
-- Add character skills.
-- Add score check system.
+- Fixed bugs
 - Add Purchase system (special thanks to https://github.com/Nu99et for making this amazing feature)
 
 
